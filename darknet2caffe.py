@@ -113,7 +113,9 @@ def cfg2prototxt(cfgfile):
     bottom = 'data'
     layer_id = 1
     topnames = dict()
-    for block in blocks:
+    for bidx in xrange(len(blocks)):
+        block = blocks[bidx]
+#    for block in blocks:
         if block['type'] == 'net':
             props['name'] = 'Darkent2Caffe'
             props['input'] = 'data'
@@ -250,6 +252,7 @@ def cfg2prototxt(cfgfile):
             topnames[layer_id] = bottom
             layer_id = layer_id + 1
         elif block['type'] == 'route':
+            print("block:%s" % block)       
             from_layers = block['layers'].split(',')
             if len(from_layers) == 1:
                 prev_layer_id = layer_id + int(from_layers[0])
@@ -257,8 +260,23 @@ def cfg2prototxt(cfgfile):
                 topnames[layer_id] = bottom
                 layer_id = layer_id + 1
             else:
-                prev_layer_id1 = layer_id + int(from_layers[0])
+
+#                if blocks[bidx-1]['type'] == 'reorg':
+#                    layers[-2]
+#                    prev_layer_id1 = blocks[bidx-1]['top']
+
+
+                prev_layer_id1 = layer_id + int(from_layers[0]) 
                 prev_layer_id2 = layer_id + int(from_layers[1])
+                print("from_layer: %s" % from_layers)
+                print("prev_layer_id1: %s" % prev_layer_id1)
+                print("prev_layer_id2: %s" % prev_layer_id2)
+                print("layer_id: %s" % layer_id)
+
+#                if layers[-1]['type'] == 'reorg':
+#                    bottom1 = layers[-1]['type']['top']
+#                    prev_layer_id1 = layer_id 
+
                 bottom1 = topnames[prev_layer_id1]
                 bottom2 = topnames[prev_layer_id2]
                 concat_layer = OrderedDict()
@@ -270,6 +288,7 @@ def cfg2prototxt(cfgfile):
                     concat_layer['top'] = 'layer%d-concat' % layer_id
                     concat_layer['name'] = 'layer%d-concat' % layer_id
                 concat_layer['type'] = 'Concat'
+                print("concat_layer: %s" % concat_layer)
                 layers.append(concat_layer)
                 bottom = concat_layer['top']
                 topnames[layer_id] = bottom
@@ -345,6 +364,13 @@ def cfg2prototxt(cfgfile):
             layer_id = layer_id+1
         elif block['type'] == 'reorg':
             reshape_layer = OrderedDict()
+
+#            print("blocks")
+#            if blocks[bidx-1]['type'] == 'route' and len(blocks[bidx-1]['layers'].split(',')) == 1:
+#                print("---------------")
+#                print("bidx: %s" % bidx)
+#                print("blocks[bidx-2]: %s" % blocks[bidx-2])
+#                reshape_layer['bottom'] = blocks[bidx-2]
             reshape_layer['bottom'] = bottom
             if block.has_key('name'):
                 avg_layer['top'] = block['name']
@@ -365,11 +391,16 @@ def cfg2prototxt(cfgfile):
             if DEBUG:
                 for k in block:
                     print("block[%s]: %s" % (k, block[k]))
-            layers.append(reshape_layer)
-            topnames[layer_id] = bottom
-            bottom = reshape_layer['top']
-            layer_id = layer_id + 1
+            layers.append(reshape_layer) 
 
+            if DEBUG:
+                print("============== reorg =========")
+                print("reshape['top']: %s" % (reshape_layer['top']))
+                print("layer_id: %s" % layer_id)
+                print("bottom: %s" % bottom)
+            bottom = reshape_layer['top']
+            topnames[layer_id] = bottom#reshape_layer['top']
+            layer_id = layer_id + 1
         else:
             print('unknow layer type %s ' % block['type'])
             topnames[layer_id] = bottom
