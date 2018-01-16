@@ -6,6 +6,8 @@ from collections import OrderedDict
 from cfg import *
 from prototxt import *
 
+DEBUG = True
+
 def darknet2caffe(cfgfile, weightfile, protofile, caffemodel):
     net_info = cfg2prototxt(cfgfile)
     save_prototxt(net_info , protofile, region=False)
@@ -341,6 +343,33 @@ def cfg2prototxt(cfgfile):
                 layers.append(relu_layer)
             topnames[layer_id] = bottom
             layer_id = layer_id+1
+        elif block['type'] == 'reorg':
+            reshape_layer = OrderedDict()
+            reshape_layer['bottom'] = bottom
+            if block.has_key('name'):
+                avg_layer['top'] = block['name']
+                avg_layer['name'] = block['name']
+            else:
+                reshape_layer['top'] = 'layer%d-reshape' % layer_id
+                reshape_layer['name'] = 'layer%d-reshape' % layer_id
+            reshape_layer['type'] = 'Reshape'
+            reshape_param = OrderedDict()
+            shape = OrderedDict()
+            # TODO: auto shape infer
+            shape['dim'] = 0 
+            shape['dim '] = 2048
+            shape['dim  '] = 9 
+            shape['dim   '] = 9 
+            reshape_param['shape'] = shape
+            reshape_layer['reshape_param'] = reshape_param
+            if DEBUG:
+                for k in block:
+                    print("block[%s]: %s" % (k, block[k]))
+            layers.append(reshape_layer)
+            topnames[layer_id] = bottom
+            bottom = reshape_layer['top']
+            layer_id = layer_id + 1
+
         else:
             print('unknow layer type %s ' % block['type'])
             topnames[layer_id] = bottom
