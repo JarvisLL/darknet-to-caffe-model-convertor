@@ -267,7 +267,7 @@ def cfg2prototxt(cfgfile):
                 else:
                     concat_layer['top'] = 'layer%d-concat' % layer_id
                     concat_layer['name'] = 'layer%d-concat' % layer_id
-                concat_layer['type'] = 'concat'
+                concat_layer['type'] = 'Concat'
                 layers.append(concat_layer)
                 bottom = concat_layer['top']
                 topnames[layer_id] = bottom
