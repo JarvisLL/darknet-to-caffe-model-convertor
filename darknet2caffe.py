@@ -248,10 +248,30 @@ def cfg2prototxt(cfgfile):
             topnames[layer_id] = bottom
             layer_id = layer_id + 1
         elif block['type'] == 'route':
-            prev_layer_id = layer_id + int(block['layers'])
-            bottom = topnames[prev_layer_id]
-            topnames[layer_id] = bottom
-            layer_id = layer_id + 1
+            from_layers = block['layers'].split(',')
+            if len(from_layers) == 1:
+                prev_layer_id = layer_id + int(from_layers[0])
+                bottom = topnames[prev_layer_id]
+                topnames[layer_id] = bottom
+                layer_id = layer_id + 1
+            else:
+                prev_layer_id1 = layer_id + int(from_layers[0])
+                prev_layer_id2 = layer_id + int(from_layers[1])
+                bottom1 = topnames[prev_layer_id1]
+                bottom2 = topnames[prev_layer_id2]
+                concat_layer = OrderedDict()
+                concat_layer['bottom'] = [bottom1, bottom2]
+                if block.has_key('name'):
+                    concat_layer['top'] = block['name']
+                    concat_layer['name'] = block['name']
+                else:
+                    concat_layer['top'] = 'layer%d-concat' % layer_id
+                    concat_layer['name'] = 'layer%d-concat' % layer_id
+                concat_layer['type'] = 'concat'
+                layers.append(concat_layer)
+                bottom = concat_layer['top']
+                topnames[layer_id] = bottom
+                layer_id = layer_id+1
         elif block['type'] == 'shortcut':
             prev_layer_id1 = layer_id + int(block['from'])
             prev_layer_id2 = layer_id - 1
