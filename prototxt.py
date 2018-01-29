@@ -162,12 +162,26 @@ def save_prototxt(net_info, protofile, region=True):
         
     props = net_info['props']
     layers = net_info['layers']
-    print >> fp, 'name: \"%s\"' % props['name']
+    """
+    print >> fp, 'layer {'
+    print >> fp, '  name: \"%s\"' % props['name']
+    print >> fp, '  type: \"Input\"'
+    print >> fp, '  top: \"data\"'
+    print >> fp, '  input_param {'
+    print >> fp, '    shape {'
+    print >> fp, '      dim: %s' % props['input_dim'][0]
+    print >> fp, '      dim: %s' % props['input_dim'][1]
+    print >> fp, '      dim: %s' % props['input_dim'][2]
+    print >> fp, '      dim: %s' % props['input_dim'][3]
+    print >> fp, '    }'
+    print >> fp, '}'
+    """
     print >> fp, 'input: \"%s\"' % props['input']
     print >> fp, 'input_dim: %s' % props['input_dim'][0]
     print >> fp, 'input_dim: %s' % props['input_dim'][1]
     print >> fp, 'input_dim: %s' % props['input_dim'][2]
     print >> fp, 'input_dim: %s' % props['input_dim'][3]
+    
     print >> fp, ''
     for layer in layers:
         if layer['type'] != 'Region' or region == True:
