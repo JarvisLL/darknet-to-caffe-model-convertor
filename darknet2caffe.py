@@ -7,6 +7,8 @@ from cfg import *
 from prototxt import *
 
 DEBUG = True
+log_handler = open('darknet2caffe_convert.log', 'w')
+sys.stdout = log_handler
 
 def darknet2caffe(cfgfile, weightfile, protofile, caffemodel):
     net_info = cfg2prototxt(cfgfile)
@@ -27,7 +29,7 @@ def darknet2caffe(cfgfile, weightfile, protofile, caffemodel):
     for block in blocks:
         if start >= buf.size:
             break
-
+        print(block['type'])
         if block['type'] == 'net':
             continue
         elif block['type'] == 'convolutional':
@@ -57,7 +59,15 @@ def darknet2caffe(cfgfile, weightfile, protofile, caffemodel):
             layer_id = layer_id+1
         elif block['type'] == 'avgpool':
             layer_id = layer_id+1
+        elif block['type'] == 'detection':
+            print("================================")
+            layer_id = layer_id+1
         elif block['type'] == 'region':
+            print("================================")
+            if block.has_key('name'):
+                print("region layer has key")
+            else:
+                print("region layer doesn't have key")
             layer_id = layer_id + 1
         elif block['type'] == 'route':
             layer_id = layer_id + 1
@@ -73,6 +83,13 @@ def darknet2caffe(cfgfile, weightfile, protofile, caffemodel):
             print("============== unknow ===============================")
             print('unknow layer type %s ' % block['type'])
             layer_id = layer_id + 1
+        # check biases for region layer
+        print(buf[start:])
+        print(buf[start:].shape)
+        print(len(buf))
+        print(buf.shape)
+    #for x in buf[:]:
+    #    print(x)
     print('save prototxt to %s' % protofile)
     save_prototxt(net_info , protofile, region=True)
     print('save caffemodel to %s' % caffemodel)
@@ -83,6 +100,16 @@ def load_conv2caffe(buf, start, conv_param):
     bias = conv_param[1].data
     conv_param[1].data[...] = np.reshape(buf[start:start+bias.size], bias.shape);   start = start + bias.size
     conv_param[0].data[...] = np.reshape(buf[start:start+weight.size], weight.shape); start = start + weight.size
+    print("bias shape:%s" % str(bias.shape))
+    print("weight shape:%s" % str(weight.shape))
+
+    bias_list = bias.tolist()
+    weight_list = weight.tolist()
+
+    print("bias_list: %s" % len(bias_list))
+    print("weight_list: %s" % len(weight_list))
+    print("bias:%s" % str(bias_list))
+    print("weight:%s" % str(weight_list))
     return start
 
 def load_fc2caffe(buf, start, fc_param):
