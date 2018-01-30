@@ -239,18 +239,17 @@ def cfg2prototxt(cfgfile):
             topnames[layer_id] = bottom
             layer_id = layer_id+1
         elif block['type'] == 'region':
-            if True:
-                region_layer = OrderedDict()
-                if block.has_key('name'):
-                    region_layer['name'] = block['name']
-                    region_layer['type'] = 'Region'
-                    region_layer['bottom'] = bottom
-                    region_layer['top'] = block['name']
-                else:
-                    region_layer['name'] = 'layer%d-region' % layer_id
-                    region_layer['type'] = 'Region'
-                    region_layer['bottom'] = bottom
-                    region_layer['top'] = 'layer%d-region' % layer_id
+            region_layer = OrderedDict()
+            if block.has_key('name'):
+                region_layer['name'] = block['name']
+                region_layer['type'] = 'Region'
+                region_layer['bottom'] = bottom
+                region_layer['top'] = block['name']
+            else:
+                region_layer['name'] = 'layer%d-region' % layer_id
+                region_layer['type'] = 'Region'
+                region_layer['bottom'] = bottom
+                region_layer['top'] = 'layer%d-region' % layer_id
                 region_param = OrderedDict()
                 region_param['anchors'] = block['anchors'].strip()
                 region_param['classes'] = block['classes']
@@ -270,9 +269,9 @@ def cfg2prototxt(cfgfile):
                 region_param['thresh'] = block['thresh']
                 region_param['random'] = block['random']
 
-                region_layer['region_param'] = region_param
-                layers.append(region_layer)
-                bottom = region_layer['top']
+            region_layer['region_param'] = region_param
+            layers.append(region_layer)
+            bottom = region_layer['top']
             topnames[layer_id] = bottom
             layer_id = layer_id + 1
         elif block['type'] == 'route':
@@ -397,10 +396,7 @@ def cfg2prototxt(cfgfile):
             reshape_param = OrderedDict()
             shape = OrderedDict()
             # TODO: auto shape infer
-            shape['dim'] = 0 
-            shape['dim '] = 2048
-            shape['dim  '] = 9 
-            shape['dim   '] = 9 
+            shape['dim'] = [1, 2048, 9, 9] 
             reshape_param['shape'] = shape
             reshape_layer['reshape_param'] = reshape_param
             if DEBUG:
