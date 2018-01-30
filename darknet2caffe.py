@@ -54,20 +54,10 @@ def darknet2caffe(cfgfile, weightfile, protofile, caffemodel):
             else:
                 fc_layer_name = 'layer%d-fc' % layer_id
             start = load_fc2caffe(buf, start, params[fc_layer_name])
-            layer_id = layer_id+1
+            layer_id = layer_id + 1
         elif block['type'] == 'maxpool':
-            layer_id = layer_id+1
+            layer_id = layer_id + 1
         elif block['type'] == 'avgpool':
-            layer_id = layer_id+1
-        elif block['type'] == 'detection':
-            print("================================")
-            layer_id = layer_id+1
-        elif block['type'] == 'region':
-            print("================================")
-            if block.has_key('name'):
-                print("region layer has key")
-            else:
-                print("region layer doesn't have key")
             layer_id = layer_id + 1
         elif block['type'] == 'route':
             layer_id = layer_id + 1
@@ -80,16 +70,9 @@ def darknet2caffe(cfgfile, weightfile, protofile, caffemodel):
         elif block['type'] == 'reorg':
             layer_id = layer_id + 1
         else:
-            print("============== unknow ===============================")
+            print("============== unknow ==============")
             print('unknow layer type %s ' % block['type'])
             layer_id = layer_id + 1
-        # check biases for region layer
-        print(buf[start:])
-        print(buf[start:].shape)
-        print(len(buf))
-        print(buf.shape)
-    #for x in buf[:]:
-    #    print(x)
     print('save prototxt to %s' % protofile)
     save_prototxt(net_info , protofile, region=True)
     print('save caffemodel to %s' % caffemodel)
@@ -100,16 +83,6 @@ def load_conv2caffe(buf, start, conv_param):
     bias = conv_param[1].data
     conv_param[1].data[...] = np.reshape(buf[start:start+bias.size], bias.shape);   start = start + bias.size
     conv_param[0].data[...] = np.reshape(buf[start:start+weight.size], weight.shape); start = start + weight.size
-    print("bias shape:%s" % str(bias.shape))
-    print("weight shape:%s" % str(weight.shape))
-
-    bias_list = bias.tolist()
-    weight_list = weight.tolist()
-
-    print("bias_list: %s" % len(bias_list))
-    print("weight_list: %s" % len(weight_list))
-    print("bias:%s" % str(bias_list))
-    print("weight:%s" % str(weight_list))
     return start
 
 def load_fc2caffe(buf, start, fc_param):
@@ -118,7 +91,6 @@ def load_fc2caffe(buf, start, fc_param):
     fc_param[1].data[...] = np.reshape(buf[start:start+bias.size], bias.shape);   start = start + bias.size
     fc_param[0].data[...] = np.reshape(buf[start:start+weight.size], weight.shape); start = start + weight.size
     return start
-
 
 def load_conv_bn2caffe(buf, start, conv_param, bn_param, scale_param):
     conv_weight = conv_param[0].data
@@ -152,22 +124,6 @@ def cfg2prototxt(cfgfile):
             props['input_dim'].append(block['channels'])
             props['input_dim'].append(block['height'])
             props['input_dim'].append(block['width'])
-            """
-            input_layer = OrderedDict()
-            input_layer['name'] = "data"
-            input_layer['type'] = "Input"
-            input_layer['top'] = "data"
-            bottom = input_layer['top']
-            input_param = OrderedDict()
-            shape = OrderedDict()
-            shape['dim'] = 1
-            shape['dim '] = block['channels']
-            shape['dim  '] = block['height']
-            shape['dim   '] = block['width']
-            input_param['shape'] = shape
-            input_layer['input_param'] = input_param
-            layers.append(input_layer)
-            """
             continue
         elif block['type'] == 'convolutional':
             conv_layer = OrderedDict()
@@ -298,7 +254,22 @@ def cfg2prototxt(cfgfile):
                 region_param = OrderedDict()
                 region_param['anchors'] = block['anchors'].strip()
                 region_param['classes'] = block['classes']
+                region_param['bias_match'] = block['bias_match']
+                region_param['coords'] = block['coords']
                 region_param['num'] = block['num']
+                region_param['softmax'] = block['softmax']
+                region_param['jitter'] = block['jitter']
+                region_param['rescore'] = block['rescore']
+
+                region_param['object_scale'] = block['object_scale']
+                region_param['noobject_scale'] = block['noobject_scale']
+                region_param['class_scale'] = block['class_scale']
+                region_param['coord_scale'] = block['coord_scale']
+
+                region_param['absolute'] = block['absolute']
+                region_param['thresh'] = block['thresh']
+                region_param['random'] = block['random']
+
                 region_layer['region_param'] = region_param
                 layers.append(region_layer)
                 bottom = region_layer['top']
@@ -413,7 +384,6 @@ def cfg2prototxt(cfgfile):
             layer_id = layer_id+1
         elif block['type'] == 'reorg':
             reshape_layer = OrderedDict()
-#TODO
             if block.has_key('name'):
                 avg_layer['name'] = block['name']
                 reshape_layer['type'] = 'Reshape'
