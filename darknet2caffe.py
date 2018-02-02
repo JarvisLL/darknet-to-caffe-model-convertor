@@ -396,7 +396,8 @@ def cfg2prototxt(cfgfile):
             reshape_param = OrderedDict()
             shape = OrderedDict()
             # TODO: auto shape infer
-            shape['dim'] = [1, 2048, 9, 9] 
+            shape['dim'] = [1, 2048, 9, 9]
+            #shape['dim'] = [1, -1, block['stride'], block['stride']]
             reshape_param['shape'] = shape
             reshape_layer['reshape_param'] = reshape_param
             if DEBUG:
