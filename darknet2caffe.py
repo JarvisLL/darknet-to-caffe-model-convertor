@@ -440,3 +440,4 @@ if __name__ == '__main__':
     protofile = sys.argv[3]
     caffemodel = sys.argv[4]
     darknet2caffe(cfgfile, weightfile, protofile, caffemodel)
+    format_data_layer(sys.argv[3])

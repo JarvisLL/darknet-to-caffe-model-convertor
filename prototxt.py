@@ -189,6 +189,52 @@ def save_prototxt(net_info, protofile, region=True):
     fp.close()
 
 
+def format_data_layer(protofile):
+    model_name_pattern = '(.*)\..*'
+    dim_pattern = 'input_dim: (.*)'
+    with open(protofile) as protofile_handle:
+        lines = protofile_handle.readlines()
+   
+    try:
+        import re
+        #model_name = re.findall(model_name_pattern, protofile)[0]
+        model_name = re.findall(model_name_pattern, protofile.replace("/", "-"))[0]
+        dim = [re.findall(dim_pattern, lines[1])[0],
+               re.findall(dim_pattern, lines[2])[0],
+               re.findall(dim_pattern, lines[3])[0],
+               re.findall(dim_pattern, lines[4])[0],
+              ]
+    except:
+        print("Don't need to format data layer")
+        savefile_handle.close()
+        return
+
+    dim = map(str, dim)
+    data_layer_str = '''name: "%(model_name)s"
+
+layer {
+  name: "data"
+  type: "Input"
+  top: "data"
+  input_param {
+    shape {
+      dim: %(dim0)s
+      dim: %(dim1)s
+      dim: %(dim2)s
+      dim: %(dim3)s
+    }    
+  }
+}\n''' % {'model_name': model_name, 'dim0': dim[0], 'dim1': dim[1], 'dim2': dim[2], 'dim3': dim[3]}
+
+    print(data_layer_str)
+
+    proto_lines_str = data_layer_str + reduce(lambda l1,l2: l1+l2, lines[5:])
+
+    savefile_handle = open(protofile, "w")
+    savefile_handle.write(proto_lines_str)    
+    savefile_handle.close()
+        
+
 if __name__ == '__main__':
     import sys
     if len(sys.argv) != 2:
