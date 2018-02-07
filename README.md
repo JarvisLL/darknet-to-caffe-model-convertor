@@ -1,13 +1,14 @@
 # darknet-to-caffe-model-convertor
 
-This repository is forked from original, which is used to support conversion from darkent to caffe, especially for YOLOv2 etc. Before use, you should ensure caffe installed, if not, for convenient, I recommand using Docker image of `Caffe` instead.
+This repository is forked from original, which is used to support conversion from darkent to caffe, especially for YOLOv2 etc. Before use, you should ensure caffe installed, if not, for convenient, I recommand using Docker image of caffe instead.
 
-After that, if your model is `YOLOv2`, it means exits `reorg` layer in model. You should define the output dimension of `reorg` layer in code `darknet2caffe.py` as below:
+After that, if your model is `YOLOv2` or having `reorg` layer in your model, it means exists `reorg` layer in model. You should define the output dimension of `reorg` layer in code `darknet2caffe.py` as below:
 
 ```python
             # TODO: auto shape infer
             shape['dim'] = [1, 2048, 9, 9]
 ```
+If you do not sure the output dimension of `reorg` layer, you can execute your model again using darknet and check its execution log, which clearly shows the output dimension of `reorg` layer.
 
 After definination, you can use command as below to convert your darknet model to caffe's:
 
