@@ -1,3 +1,24 @@
+# darknet-to-caffe-model-convertor
+
+This repository is forked from original, which is used to support conversion from darkent to caffe, especially for YOLOv2 etc. Before use, you should ensure caffe installed, if not, for convenient, I recommand using Docker image of `Caffe` instead.
+
+After that, if your model is `YOLOv2`, it means exits `reorg` layer in model. You should define the output dimension of `reorg` layer in code `darknet2caffe.py` as below:
+
+```python
+            # TODO: auto shape infer
+            shape['dim'] = [1, 2048, 9, 9]
+```
+
+After definination, you can use command as below to convert your darknet model to caffe's:
+
+```shell
+python darknet2caffe.py DARKNET_CFG DARKNET_WEIGHTS CAFFE_PROTOTOXT CAFFE_CAFFEMODEL
+```
+
+Below is from original, which can be ignored.
+
+----
+
 # pytorch-caffe-darknet-convert
 This repository is specially designed for [pytorch-yolo2](https://github.com/marvis/pytorch-yolo2) to convert pytorch trained model to any platform. It can also be used as a common model converter between pytorch, caffe and darknet.
 
