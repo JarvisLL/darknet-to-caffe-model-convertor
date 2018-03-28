@@ -1,3 +1,7 @@
+WARNING: Move forward to [ysh329/darknet2caffe: Convert Darknet model to Caffe's](https://github.com/ysh329/darknet2caffe)
+
+
+
 # darknet-to-caffe-model-convertor
 
 This repository forked from original is used to support conversion from darkent to caffe, especially for YOLOv2 and tiny-YOLO etc. Before use, ensure caffe installed, recommanding using Docker image of `bvlc/caffe:cpu` instead.
